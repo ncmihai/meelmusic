@@ -5,6 +5,7 @@ import Search from './pages/Search';
 import Library from './pages/Library';
 import Login from './pages/Login';
 import AudioPlayer from './components/AudioPlayer';
+import MainLayout from './components/MainLayout';
 
 export default function App() {
   return (
@@ -17,10 +18,12 @@ export default function App() {
           {/* Public route */}
           <Route path="/login" element={<Login />} />
 
-          {/* Protected routes — redirect to /login if not authenticated */}
-          <Route path="/" element={<Home />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/library" element={<Library />} />
+          {/* Protected routes — wrapped in MainLayout for global Sidebar/Player */}
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/library" element={<Library />} />
+          </Route>
         </Routes>
       </AuthProvider>
     </BrowserRouter>

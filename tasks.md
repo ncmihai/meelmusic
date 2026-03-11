@@ -149,6 +149,7 @@
 - [x] Logica `youtubeService.ts` a fost reimplementată pentru a interoga o instanță publică de **JioSaavn API** open-source.
 - [x] Acum primim linkuri directe `.mp4`/`.m4a` la 320kbps.
 - [x] Reîntors la elementul nativ `<audio>` în `AudioPlayer.tsx` pentru fiabilitate maximă, lipsa erorilor de CORS, și suport nativ pentru **Seek**.
+- [ ] **NEW:** Matching Strict (Duration Check). Când JioSaavn returnează rezultate, comparăm durata audio cu `duration_ms` de la Spotify. Dacă diferența e > 15 secunde, trecem la următorul rezultat JioSaavn pentru a evita remixuri/versiuni greșite.
 
 ### 5.6 Vercel Serverless Proxy (Anulat / Obsoleto)
 - [x] S-a renunțat la proxy-uri locale și Vercel rules, deoarece iTunes API funcționează nativ direct în browser având `Access-Control-Allow-Origin: *`.
@@ -204,17 +205,17 @@
 - **Ce înveți:** Design systems, design tokens, component-driven UI
 
 ### 7.2 Layout Principal
-- [ ] `MainLayout`: Sidebar (stânga) + Content (centru) + Player Bar (jos, fixed)
-- [ ] Sidebar: logo, navigație, playlisturi
+- [x] `MainLayout`: Sidebar (stânga) + Content (centru) + Player Bar (jos, fixed)
+- [x] Sidebar: logo, navigație, playlisturi
 - [ ] Mobile: sidebar → bottom nav bar
-- [ ] Test: navigație consistentă
+- [x] Test: navigație consistentă
 - **Ce înveți:** CSS Grid/Flexbox, responsive design, persistent UI
 
 ### 7.3 Player Bar complet
-- [ ] Info: thumbnail (Spotify cover) + titlu + artist
-- [ ] Controale: Prev, Play/Pause, Next
-- [ ] Progress bar clickabil + draggable
-- [ ] Volum slider + mute
+- [x] Info: thumbnail (Spotify cover) + titlu + artist
+- [x] Controale: Prev, Play/Pause, Next
+- [x] Progress bar clickabil + draggable
+- [x] Volum slider + mute
 - [ ] Buton Like (❤️) → toggle `liked_songs`
 - [ ] Buton Queue
 - [ ] Animații hover + tranziții smooth
@@ -228,12 +229,21 @@
 - [ ] Cards cu scroll orizontal pe mobile
 - **Ce înveți:** Dashboard layout, horizontal scroll, skeleton loading
 
-### 7.5 Pagina Search
+### 7.5 Pagina Search & Recommendations 🎵
 - [ ] Search bar cu debounce (200ms) → Spotify API
 - [ ] Rezultate: cover (Spotify), titlu, artist, durată
-- [ ] Butoane: Play (→ YouTube.js stream), Add to Queue, Add to Playlist, Like, Download
+- [ ] **NEW:** Secțiune "Recomandări pentru tine" folosind Spotify Recommendations API (bazat pe istoricul de ascultare sau melodii Liked).
+- [ ] Butoane: Play (→ JioSaavn stream), Add to Queue, Add to Playlist, Like, Download
 - [ ] States: loading, empty, error
-- **Ce înveți:** Debounced search, hybrid data flow (Spotify UI → YouTube audio)
+- **Ce înveți:** Debounced search, Spotify recommendation seeds, hybrid data flow.
+
+### 7.5.1 Versuri Sincronizate (Lyrics Toggle) 🎤
+- [ ] Implementare buton "Lyrics" în PlayerBar.
+- [ ] La activare, interfața principală culisează spre stânga (Spotify style).
+- [ ] Se deschide un panel lateral dreapta cu versurile curente.
+- [ ] Integrare **Musixmatch API** (sau similar) pentru a aduce versurile per melodie.
+- [ ] Sincronizare vizuală a versurilor cu secundele melodiilor (dacă API-ul suportă time-synced lyrics).
+- **Ce înveți:** UI sliding animations, third-party lyrics API, time-syncing text cu `<audio>`.
 
 ### 7.6 Pagina Library
 - [ ] Tab-uri: "Playlists" + "Liked Songs"
