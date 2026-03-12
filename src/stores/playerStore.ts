@@ -14,6 +14,8 @@ interface PlayerState {
   duration: number; // total time in seconds
   queue: Song[];
   seekTarget: number | null; // time to seek to (handled by AudioPlayer)
+  showLyrics: boolean; // toggle for Lyrics panel
+  showQueue: boolean; // toggle for Queue panel
   
   // Actions
   play: (song?: Song) => void;
@@ -29,6 +31,8 @@ interface PlayerState {
   addToQueue: (song: Song) => void;
   setQueue: (songs: Song[]) => void;
   clearQueue: () => void;
+  toggleLyrics: () => void;
+  toggleQueue: () => void;
 }
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
@@ -39,6 +43,11 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   duration: 0,
   queue: [],
   seekTarget: null,
+  showLyrics: false,
+  showQueue: false,
+
+  toggleLyrics: () => set((state) => ({ showLyrics: !state.showLyrics, showQueue: false })),
+  toggleQueue: () => set((state) => ({ showQueue: !state.showQueue, showLyrics: false })),
 
   seek: (time) => set({ seekTarget: time, progress: time }),
   clearSeek: () => set({ seekTarget: null }),

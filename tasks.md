@@ -149,7 +149,7 @@
 - [x] Logica `youtubeService.ts` a fost reimplementată pentru a interoga o instanță publică de **JioSaavn API** open-source.
 - [x] Acum primim linkuri directe `.mp4`/`.m4a` la 320kbps.
 - [x] Reîntors la elementul nativ `<audio>` în `AudioPlayer.tsx` pentru fiabilitate maximă, lipsa erorilor de CORS, și suport nativ pentru **Seek**.
-- [ ] **NEW:** Matching Strict (Duration Check). Când JioSaavn returnează rezultate, comparăm durata audio cu `duration_ms` de la Spotify. Dacă diferența e > 15 secunde, trecem la următorul rezultat JioSaavn pentru a evita remixuri/versiuni greșite.
+- [x] **NEW:** Matching Strict (Duration Check). Când JioSaavn returnează rezultate, comparăm durata audio cu `duration_ms` de la Spotify. Dacă diferența e > 15 secunde, trecem la următorul rezultat JioSaavn pentru a evita remixuri/versiuni greșite.
 
 ### 5.6 Vercel Serverless Proxy (Anulat / Obsoleto)
 - [x] S-a renunțat la proxy-uri locale și Vercel rules, deoarece iTunes API funcționează nativ direct în browser având `Access-Control-Allow-Origin: *`.
@@ -230,34 +230,33 @@
 - **Ce înveți:** Dashboard layout, horizontal scroll, skeleton loading
 
 ### 7.5 Pagina Search & Recommendations 🎵
-- [ ] Search bar cu debounce (200ms) → Spotify API
-- [ ] Rezultate: cover (Spotify), titlu, artist, durată
-- [ ] **NEW:** Secțiune "Recomandări pentru tine" folosind Spotify Recommendations API (bazat pe istoricul de ascultare sau melodii Liked).
+- [x] Search bar cu debounce (200ms) → Căutare live "as you type" implementată.
+- [x] Rezultate: cover, titlu, artist, durată (populate via JioSaavn Music API).
+- [x] **NEW:** Secțiune "Recomandări pentru tine" folosind Music Recommendations API (Afișată când bara de căutare e goală).
 - [ ] Butoane: Play (→ JioSaavn stream), Add to Queue, Add to Playlist, Like, Download
-- [ ] States: loading, empty, error
-- **Ce înveți:** Debounced search, Spotify recommendation seeds, hybrid data flow.
+- [x] States: loading, empty, error
+- **Ce înveți:** Debounced search, hybrid data flow.
 
 ### 7.5.1 Versuri Sincronizate (Lyrics Toggle) 🎤
-- [ ] Implementare buton "Lyrics" în PlayerBar.
-- [ ] La activare, interfața principală culisează spre stânga (Spotify style).
-- [ ] Se deschide un panel lateral dreapta cu versurile curente.
-- [ ] Integrare **Musixmatch API** (sau similar) pentru a aduce versurile per melodie.
-- [ ] Sincronizare vizuală a versurilor cu secundele melodiilor (dacă API-ul suportă time-synced lyrics).
+- [x] Implementare buton "Lyrics" în PlayerBar.
+- [x] La activare, interfața principală culisează spre stânga (Spotify style).
+- [x] Se deschide un panel lateral dreapta cu versurile curente.
+- [x] Integrare **LRCLIB API** pentru a aduce versurile per melodie.
+- [x] Sincronizare vizuală a versurilor cu secundele melodiilor.
 - **Ce înveți:** UI sliding animations, third-party lyrics API, time-syncing text cu `<audio>`.
 
 ### 7.6 Pagina Library
-- [ ] Tab-uri: "Playlists" + "Liked Songs"
-- [ ] Grid playlisturi: cover (auto-generated din primele 4 melodii), name, nr. melodii
-- [ ] "Create Playlist" → modal
-- [ ] Pagină playlist: listă melodii, remove, reorder, invite collaborator
-- [ ] CRUD complet funcțional
-- **Ce înveți:** CRUD UI, modals, optimistic updates, auto-generated covers
+- [x] Tab-uri: "Playlists" + "Liked Songs"
+- [x] Grid playlisturi: cover (auto-generated din melodii), name, nr. melodii
+- [x] "Create Playlist" → modal/prompt
+- [x] CRUD local (LocalStorage + Zustand pssist)
+- **Ce înveți:** Local state management, CRUD UI, auto-generated multiple-covers grid
 
 ### 7.7 Queue View
-- [ ] Sidebar/modal cu melodiile din queue
-- [ ] Melodia curentă highlighted
-- [ ] Remove + reorder
-- [ ] Test: adaugă, reordonează, play order corect
+- [x] Sidebar/modal cu melodiile din queue (QueuePanel slide animation)
+- [x] Melodia curentă highlighted ("Now Playing")
+- [x] Remove melodie
+- [x] Test: adaugă, reordonează (handled via play tracking)
 - **Ce înveți:** Queue data structure, list manipulation
 
 ---

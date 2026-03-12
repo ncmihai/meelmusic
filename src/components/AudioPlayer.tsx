@@ -31,8 +31,8 @@ export default function AudioPlayer() {
       if (!audioRef.current) return;
 
       try {
-        // Find best audio stream (now via JioSaavn MP4 direct links)
-        const streamUrl = await getAudioStream(currentSong.title, currentSong.artist);
+        // Find best audio stream (now via JioSaavn MP4 direct links, enforcing duration match)
+        const streamUrl = await getAudioStream(currentSong.title, currentSong.artist, currentSong.duration_ms);
         
         if (!active) return; // Prevent race conditions if song changes fast
         

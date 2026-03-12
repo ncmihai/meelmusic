@@ -1,8 +1,10 @@
 import { usePlayerStore } from '../stores/playerStore';
-import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Shuffle, Repeat, Heart } from 'lucide-react';
+import { useLibraryStore } from '../stores/libraryStore';
+import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Shuffle, Repeat, Heart, Mic, ListMusic } from 'lucide-react';
 
 export default function PlayerBar() {
-  const { currentSong, isPlaying, volume, progress, duration, togglePlay, next, setVolume, seek } = usePlayerStore();
+  const { currentSong, isPlaying, volume, progress, duration, togglePlay, next, prev, setVolume, seek, showLyrics, toggleLyrics, showQueue, toggleQueue } = usePlayerStore();
+  const { toggleLikeSong, isLiked } = useLibraryStore();
 
   const formatTime = (seconds: number) => {
     if (isNaN(seconds)) return "0:00";
@@ -33,8 +35,11 @@ export default function PlayerBar() {
                 {currentSong.artist}
               </span>
             </div>
-            <button className="ml-4 text-[#b3b3b3] hover:text-white">
-              <Heart size={16} /> {/* Placeholder for actual Like component later */}
+            <button 
+              onClick={() => toggleLikeSong(currentSong)}
+              className={`ml-4 transition-colors ${isLiked(currentSong.id) ? 'text-[#1db954]' : 'text-[#b3b3b3] hover:text-white'}`}
+            >
+              <Heart size={16} fill={isLiked(currentSong.id) ? 'currentColor' : 'none'} />
             </button>
           </>
         ) : (
@@ -49,6 +54,7 @@ export default function PlayerBar() {
             <Shuffle size={20} />
           </button>
           <button 
+            onClick={prev}
             className="text-[#b3b3b3] hover:text-white disabled:opacity-50"
             disabled={!currentSong}
           >
@@ -99,29 +105,51 @@ export default function PlayerBar() {
         </div>
       </div>
 
-      {/* Right: Volume Controls */}
-      <div className="w-[30%] flex items-center justify-end gap-3 min-w-[180px]">
+      {/* Right: Extra Controls (Lyrics, Queue, Volume) */}
+      <div className="w-[30%] flex items-center justify-end gap-3 min-w-[200px]">
+        
+        {/* Lyrics Toggle */}
         <button 
-          onClick={() => setVolume(volume === 0 ? 1 : 0)}
-          className="text-[#b3b3b3] hover:text-white"
+          onClick={toggleLyrics}
+          className={`hover:text-white transition-colors ${showLyrics ? 'text-[#1db954]' : 'text-[#b3b3b3]'}`}
+          title="Lyrics"
         >
-          {volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
+          <Mic size={18} />
         </button>
-        <div className="w-24 h-3 flex items-center relative group">
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value={volume}
-            onChange={(e) => setVolume(parseFloat(e.target.value))}
-            className="absolute inset-0 w-full opacity-0 cursor-pointer z-10"
-          />
-          <div className="w-full h-1 bg-[#4d4d4d] rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-white group-hover:bg-[#1db954] rounded-full"
-              style={{ width: `${volume * 100}%` }}
+
+        {/* Queue Toggle */}
+        <button 
+          onClick={toggleQueue}
+          className={`hover:text-white transition-colors ${showQueue ? 'text-[#1db954]' : 'text-[#b3b3b3]'}`}
+          title="Queue"
+        >
+          <ListMusic size={18} />
+        </button>
+
+        {/* Volume */}
+        <div className="flex items-center gap-2 ml-2">
+          <button 
+            onClick={() => setVolume(volume === 0 ? 1 : 0)}
+            className="text-[#b3b3b3] hover:text-white"
+          >
+            {volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
+          </button>
+          <div className="w-24 h-3 flex items-center relative group">
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={volume}
+              onChange={(e) => setVolume(parseFloat(e.target.value))}
+              className="absolute inset-0 w-full opacity-0 cursor-pointer z-10"
             />
+            <div className="w-full h-1 bg-[#4d4d4d] rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-white group-hover:bg-[#1db954] rounded-full"
+                style={{ width: `${volume * 100}%` }}
+              />
+            </div>
           </div>
         </div>
       </div>

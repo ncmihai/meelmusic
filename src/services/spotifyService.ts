@@ -1,129 +1,116 @@
 // ========================================
-// Spotify API Service — Task 5.3 & 5.4
+// Spotify/Music Metadata Service — Task 5.3 & 5.4
 // Fetches Metadata (search, popular, album covers)
+// *Pivot*: Bypassing Spotify's strict ClientCredentials browser block 
+// by using the same open-source JioSaavn API wrapper we use for audio.
 // ========================================
 
-const SPOTIFY_CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
-const SPOTIFY_CLIENT_SECRET = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
+const MUSIC_API = 'https://jiosaavn-api-privatecvc2.vercel.app';
 
-let accessToken = '';
-let tokenExpirationTime = 0;
-
-/**
- * Implements the OAuth 2.0 Client Credentials flow.
- * We fetch an access token server-to-server style (no user login required).
- */
-export async function getSpotifyToken(): Promise<string> {
-  // Return cached token if still valid (adding 60s buffer)
-  if (accessToken && Date.now() < tokenExpirationTime - 60000) {
-    return accessToken;
-  }
-
-  if (!SPOTIFY_CLIENT_ID || !SPOTIFY_CLIENT_SECRET) {
-    throw new Error('Missing Spotify credentials in .env');
-  }
-
-  const credentials = btoa(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`);
-
-  try {
-    const response = await fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${credentials}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: 'grant_type=client_credentials',
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch Spotify token: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    accessToken = data.access_token;
-    // Token usually valid for 3600 seconds (1 hour)
-    tokenExpirationTime = Date.now() + (data.expires_in * 1000);
-    
-    return accessToken;
-  } catch (error) {
-    console.error('Spotify token error:', error);
-    throw error;
-  }
-}
-
-/** Helper to make authenticated requests to Spotify */
-async function fetchSpotify(endpoint: string, params?: Record<string, string>) {
-  const token = await getSpotifyToken();
-  const url = new URL(`https://api.spotify.com/v1${endpoint}`);
+/** Map Saavn track to our internal Song type */
+function mapTrack(track: any) {
+  // Use high quality image if available
+  const imgArray = track.image || [];
+  const bestImage = imgArray.length > 0 ? imgArray[imgArray.length - 1].link : '';
   
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (value) url.searchParams.append(key, value);
-    });
+  // Format artists correctly (handle arrays or strings)
+  let artistName = "Unknown Artist";
+  if (track.primaryArtists) {
+    artistName = Array.isArray(track.primaryArtists) 
+      ? track.primaryArtists.map((a: any) => a.name || a).join(', ')
+      : String(track.primaryArtists);
   }
 
-  const response = await fetch(url.toString(), {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Spotify API error: ${response.statusText}`);
-  }
-
-  return response.json();
-}
-
-/** Map Spotify track to our internal Song type */
-function mapSpotifyTrack(track: any) {
   return {
-    id: track.id, // Using Spotify ID as primary key
-    title: track.name,
-    artist: track.artists.map((a: any) => a.name).join(', '),
-    cover_url: track.album?.images[0]?.url || '',
-    duration_ms: track.duration_ms,
+    id: track.id, 
+    title: String(track.name || "Unknown").replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&amp;/g, "&"),
+    artist: artistName.replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&amp;/g, "&"),
+    cover_url: bestImage,
+    // Saavn duration is usually in seconds string, convert to ms for App consistency
+    duration_ms: track.duration ? parseInt(track.duration, 10) * 1000 : 0,
     album: track.album?.name,
   };
 }
 
 /**
- * Searches Spotify for tracks
+ * Searches for tracks
  */
 export async function searchSpotifySongs(query: string, limit = 20) {
   if (!query.trim()) return [];
   
-  const data = await fetchSpotify('/search', {
-    q: query,
-    type: 'track',
-    limit: limit.toString(),
-  });
-  
-  return data.tracks.items.map(mapSpotifyTrack);
+  try {
+    const response = await fetch(`${MUSIC_API}/search/songs?query=${encodeURIComponent(query)}&limit=${limit}`);
+    
+    if (!response.ok) throw new Error("Search Error");
+    const data = await response.json();
+    
+    if (data.status === "SUCCESS" && data.data?.results) {
+      return data.data.results.map(mapTrack);
+    }
+    return [];
+  } catch (err) {
+    console.error("Search failed in proxy API:", err);
+    return [];
+  }
 }
 
 /**
- * Gets "popular" / returning tracks (e.g. from a global top 50 playlist)
- * Uses Spotify's "Top 50 - Global" playlist ID: 37i9dQZEVXbMDoHDwVN2tF
+ * Gets "popular" / returning tracks (e.g. from a global top playlist)
  */
-export async function getPopularSongs(limit = 10) {
-  const data = await fetchSpotify('/playlists/37i9dQZEVXbMDoHDwVN2tF/tracks', {
-    limit: limit.toString(),
-  });
-  
-  return data.items
-    .filter((item: any) => item.track) // Filter out nulls
-    .map((item: any) => mapSpotifyTrack(item.track));
+export async function getPopularSongs() {
+  try {
+    // English Top Songs playlist ID from Saavn
+    const response = await fetch(`${MUSIC_API}/playlists?id=107312154`);
+    if (!response.ok) throw new Error("Playlist Error");
+    
+    const data = await response.json();
+    if (data.status === "SUCCESS" && data.data?.songs) {
+      return data.data.songs.slice(0, 15).map(mapTrack);
+    }
+    return [];
+  } catch (err) {
+    console.error("Popular songs failed in proxy API:", err);
+    return [];
+  }
 }
 
 /**
- * Gets recommendations based on a seed track (useful for infinite auto-play)
+ * Gets recommendations. Saavn doesn't have a direct 'genre' recommendation like Spotify,
+ * so we fall back to fetching a curated Top/Trending English playlist to act as the "Made for you" grid.
  */
-export async function getRecommendations(seedTrackId: string, limit = 5) {
-  const data = await fetchSpotify('/recommendations', {
-    seed_tracks: seedTrackId,
-    limit: limit.toString(),
-  });
-  
-  return data.tracks.map(mapSpotifyTrack);
+export async function getGenreRecommendations() {
+  try {
+     // Fetching 'Trending English' or similar curated list from Saavn
+     const response = await fetch(`${MUSIC_API}/modules?language=english`);
+     if (!response.ok) throw new Error("Modules Error");
+     
+     const data = await response.json();
+     if (data.status === "SUCCESS" && data.data?.trending?.songs) {
+       return data.data.trending.songs.slice(0, 15).map(mapTrack);
+     }
+     
+     // Fallback to Popular
+     return await getPopularSongs();
+  } catch (err) {
+    console.error("Recommendations failed in proxy API:", err);
+    return [];
+  }
+}
+
+/**
+ * Gets recommendations based on a seed track (used for infinite play later)
+ */
+export async function getRecommendations(seedTrackId: string) {
+  try {
+    const response = await fetch(`${MUSIC_API}/songs/${seedTrackId}/suggestions`);
+    if (!response.ok) throw new Error("Suggestions Error");
+    
+    const data = await response.json();
+    if (data.status === "SUCCESS" && Array.isArray(data.data)) {
+      return data.data.slice(0, 10).map(mapTrack);
+    }
+    return [];
+  } catch(err) {
+    return [];
+  }
 }
