@@ -1,13 +1,20 @@
 import { useState, useEffect } from 'react';
-import { Search as SearchIcon, Play } from 'lucide-react';
-import { searchSpotifySongs, getGenreRecommendations } from '../services/spotifyService';
+import { Play, User as UserIcon } from 'lucide-react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { searchSpotifySongs, getGenreRecommendations, searchArtists } from '../services/spotifyService';
 import { usePlayerStore } from '../stores/playerStore';
 import { useDebounce } from '../hooks/useDebounce';
+import ContextMenu from '../components/ContextMenu';
+import ArtistList from '../components/ArtistList';
 import type { Song } from '../types';
 
 export default function Search() {
-  const [query, setQuery] = useState('');
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const query = searchParams.get('q') || '';
+  
   const [results, setResults] = useState<Song[]>([]);
+  const [topArtist, setTopArtist] = useState<any>(null);
   const [recommendations, setRecommendations] = useState<Song[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isLoadingRecs, setIsLoadingRecs] = useState(true);
@@ -20,16 +27,37 @@ export default function Search() {
   useEffect(() => {
     if (debouncedQuery.trim() === '') {
       setResults([]);
+      setTopArtist(null); // Clear top artist when query is empty
       return;
     }
 
     const performSearch = async () => {
       setIsSearching(true);
       try {
-        const tracks = await searchSpotifySongs(debouncedQuery, 20);
-        setResults(tracks);
+        const [songsRes, artistsRes] = await Promise.all([
+          searchSpotifySongs(debouncedQuery, 15),
+          searchArtists(debouncedQuery, 3)
+        ]);
+        
+        setResults(songsRes);
+        
+        // Exact strict match on artist search or rely on API confidence
+        // JioSaavn usually returns the most relevant artist first.
+        if (artistsRes.length > 0) {
+          // If the first result's name roughly matches the query
+          const firstArtist = artistsRes[0];
+          if (firstArtist.name.toLowerCase().includes(debouncedQuery.toLowerCase()) || 
+              debouncedQuery.toLowerCase().includes(firstArtist.name.toLowerCase())) {
+            setTopArtist(firstArtist);
+          } else {
+            setTopArtist(null);
+          }
+        } else {
+          setTopArtist(null);
+        }
+
       } catch (err) {
-        console.error("Search error:", err);
+        console.error('Search error:', err);
       } finally {
         setIsSearching(false);
       }
@@ -102,8 +130,21 @@ export default function Search() {
                   <Play size={24} className="fill-current ml-1" />
                 </button>
               </div>
-              <h3 className="text-white font-bold truncate mb-1">{song.title}</h3>
-              <p className="text-[#a7a7a7] text-sm truncate">{song.artist}</p>
+              <div className="flex justify-between items-start">
+                <div className="overflow-hidden flex-1 pr-2">
+                  <h3 className="text-white font-bold truncate mb-1">{song.title}</h3>
+                  <div className="text-[#a7a7a7] text-sm truncate">
+                    <ArtistList artists={song.artist} />
+                  </div>
+                </div>
+                <div onClick={e => e.stopPropagation()} className="shrink-0 -mr-2 -mt-1 hidden sm:block">
+                   <ContextMenu song={song} />
+                </div>
+              </div>
+              {/* Visible on mobile without hover */}
+              <div onClick={e => e.stopPropagation()} className="absolute top-2 right-2 bg-black/40 rounded-full sm:hidden backdrop-blur-md">
+                <ContextMenu song={song} />
+              </div>
             </div>
           ))}
         </div>
@@ -113,23 +154,6 @@ export default function Search() {
 
   return (
     <div className="h-full flex flex-col p-6 overflow-y-auto">
-      
-      {/* Search Header */}
-      <div className="sticky top-0 z-10 bg-transparent pb-6 backdrop-blur-md">
-        <div className="relative max-w-md">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <SearchIcon className="text-black" size={20} />
-          </div>
-          <input
-            type="text"
-            className="w-full bg-white text-black text-sm rounded-full py-3.5 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-white border-none placeholder-gray-500 font-medium"
-            placeholder="What do you want to listen to?"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </div>
-      </div>
-
       {/* Main Content Area */}
       <div className="flex-1 mt-2">
         {query.trim() === '' ? (
@@ -137,10 +161,42 @@ export default function Search() {
           renderGrid(recommendations, "Made for you", isLoadingRecs)
         ) : (
           // Active Search State
-          renderGrid(results, "Top Results", isSearching)
+          <div className="flex flex-col gap-8">
+            {/* 1. TOP RESULT CARD (Artist Focus) */}
+            {topArtist && (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <h2 className="text-2xl font-bold text-white mb-6">Rezultat Principal</h2>
+                <div 
+                  onClick={() => navigate(`/artist/${encodeURIComponent(topArtist.name)}`)}
+                  className="bg-[#181818] hover:bg-[#282828] transition-colors p-6 rounded-xl flex flex-col md:flex-row gap-6 max-w-2xl cursor-pointer group relative shadow-xl hover:shadow-2xl"
+                >
+                  {topArtist.cover_url ? (
+                    <img src={topArtist.cover_url} alt={topArtist.name} className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover shadow-2xl shrink-0" />
+                  ) : (
+                    <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-[#3e3e3e] flex items-center justify-center shrink-0">
+                      <UserIcon size={48} className="text-[#a7a7a7]" />
+                    </div>
+                  )}
+                  
+                  <div className="flex flex-col justify-center flex-1">
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-2 truncate group-hover:underline">
+                      {topArtist.name}
+                    </h1>
+                    <span className="bg-[#121212] px-3 py-1 rounded-full text-sm font-bold w-max uppercase tracking-wider text-[#a7a7a7]">
+                      Artist
+                    </span>
+                  </div>
+
+                  {/* Optional big play button if we want to play their radios, for now just navigation */}
+                </div>
+              </div>
+            )}
+
+            {/* 2. SONGS RESULTS */}
+            {renderGrid(results, "Piese", isSearching)}
+          </div>
         )}
       </div>
-
     </div>
   );
 }

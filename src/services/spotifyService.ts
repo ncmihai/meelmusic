@@ -45,11 +45,90 @@ export async function searchSpotifySongs(query: string, limit = 20) {
     const data = await response.json();
     
     if (data.status === "SUCCESS" && data.data?.results) {
-      return data.data.results.map(mapTrack);
+      const allTracks = data.data.results.map(mapTrack);
+      
+      // Deduplication: Keep only one version of a song per artist
+      const uniqueTracks: typeof allTracks = [];
+      const seenKeys = new Set<string>();
+      
+      for (const t of allTracks) {
+        // Strip common redundant suffixes for stricter deduplication
+        let cleanTitle = t.title.toLowerCase();
+        cleanTitle = cleanTitle.replace(/\s*\(.*(remix|instrumental|edit|mix|version|radio|live).*\)/i, '').trim();
+        cleanTitle = cleanTitle.replace(/\s*-.*(remix|instrumental|edit|mix|version|radio|live).*/i, '').trim();
+        
+        const key = `${cleanTitle}:::${t.artist.toLowerCase()}`;
+        if (!seenKeys.has(key)) {
+          seenKeys.add(key);
+          uniqueTracks.push(t);
+        }
+      }
+      return uniqueTracks;
     }
     return [];
   } catch (err) {
     console.error("Search failed in proxy API:", err);
+    return [];
+  }
+}
+
+/**
+ * Searches for albums
+ */
+export async function searchAlbums(query: string, limit = 10) {
+  if (!query.trim()) return [];
+  try {
+    const response = await fetch(`${MUSIC_API}/search/albums?query=${encodeURIComponent(query)}&limit=${limit}`);
+    if (!response.ok) throw new Error("Search Error");
+    
+    const data = await response.json();
+    if (data.status === "SUCCESS" && data.data?.results) {
+      return data.data.results.map((album: any) => {
+        
+        let parsedArtist = "Unknown";
+        if (Array.isArray(album.primaryArtists) && album.primaryArtists.length > 0) {
+           parsedArtist = album.primaryArtists.map((a: any) => a.name).join(', ').replace(/&amp;/g, "&");
+        } else if (typeof album.primaryArtists === 'string') {
+           parsedArtist = album.primaryArtists;
+        }
+
+        return {
+          id: album.id,
+          title: String(album.name || "Unknown").replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&amp;/g, "&"),
+          artist: parsedArtist,
+          cover_url: album.image && album.image.length > 0 ? album.image[album.image.length - 1].link : '',
+          year: album.year || '',
+        };
+      });
+    }
+    return [];
+  } catch (err) {
+    console.error("Album search failed:", err);
+    return [];
+  }
+}
+
+/**
+ * Searches precisely for Artists
+ */
+export async function searchArtists(query: string, limit = 5) {
+  if (!query.trim()) return [];
+  try {
+    const response = await fetch(`${MUSIC_API}/search/artists?query=${encodeURIComponent(query)}&limit=${limit}`);
+    if (!response.ok) throw new Error("Search Error");
+    
+    const data = await response.json();
+    if (data.status === "SUCCESS" && data.data?.results) {
+      return data.data.results.map((artist: any) => ({
+        id: artist.id,
+        name: String(artist.title || artist.name || "Unknown").replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&amp;/g, "&"),
+        cover_url: artist.image && artist.image.length > 0 ? artist.image[artist.image.length - 1].link : '',
+        role: artist.role || 'artist'
+      }));
+    }
+    return [];
+  } catch (err) {
+    console.error("Artist search failed:", err);
     return [];
   }
 }

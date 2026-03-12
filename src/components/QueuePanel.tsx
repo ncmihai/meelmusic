@@ -1,5 +1,6 @@
 import { usePlayerStore } from '../stores/playerStore';
 import { Play, X, Music } from 'lucide-react';
+import ArtistList from './ArtistList';
 import type { Song } from '../types';
 
 export default function QueuePanel() {
@@ -41,7 +42,9 @@ export default function QueuePanel() {
               </div>
               <div className="flex flex-col truncate flex-1">
                 <span className="text-[#1db954] font-medium truncate">{currentSong.title}</span>
-                <span className="text-xs text-[#a7a7a7] truncate">{currentSong.artist}</span>
+                <span className="text-xs text-[#a7a7a7] truncate">
+                  <ArtistList artists={currentSong.artist} />
+                </span>
               </div>
             </div>
           ) : (
@@ -71,7 +74,9 @@ export default function QueuePanel() {
                   
                   <div className="flex flex-col truncate flex-1">
                     <span className="text-white font-medium truncate group-hover:underline">{song.title}</span>
-                    <span className="text-xs text-[#a7a7a7] truncate group-hover:text-white">{song.artist}</span>
+                    <span className="text-xs text-[#a7a7a7] truncate">
+                      <ArtistList artists={song.artist} />
+                    </span>
                   </div>
 
                   <button 

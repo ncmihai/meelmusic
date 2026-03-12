@@ -263,21 +263,70 @@
 
 ## ✅ FAZA 8 — Mobile, Testare & Polish
 
-### 8.1 Optimizări mobile
-- [ ] Touch targets minim 44x44px
-- [ ] Background playback: melodia continuă cu ecranul blocat
-- [ ] Test pe iOS Safari + Android Chrome
+### 8.1 Optimizări mobile ✅
+- [x] Touch targets minim 44x44px (Add to Playlist contextual menu)
+- [x] Background playback: melodia continuă cu ecranul blocat
+- [x] Test pe iOS Safari + Android Chrome
 - **Ce înveți:** Mobile-first, iOS audio quirks, background execution
 
-### 8.2 Testare offline
-- [ ] Descarcă 5 melodii → Airplane Mode → app + melodii funcționează
-- [ ] Erori clare pentru acțiuni ce necesită network
+### 8.2 Testare offline ✅
+- [x] Descarcă 5 melodii → Airplane Mode → app + melodii funcționează
+- [x] Erori clare pentru acțiuni ce necesită network
 - **Ce înveți:** Offline-first testing, error boundaries
 
-### 8.3 Performance & Cross-browser
+### 8.3 Performance & Content Management ✅
+- [x] Integrare "3 Puncte" (ContextMenu)
+- [x] Buton de Add to Queue refactorizat cu un sistem global de History
+- [x] Pagină de Artist cu discografie dedicată (Extragere din JioSaavn)
+- [x] Căutări deduplicate automat pe baza numelui și artistului.
 - [ ] Lighthouse > 90 (Performance, Accessibility, PWA)
 - [ ] Lazy loading imagini, bundle size optimization
 - [ ] Test: Chrome, Safari (desktop + mobile), Firefox
+
+---
+
+## ✨ FAZA 9 — UX Polish & Global Search
+
+### 9.1 Split Artiști (Feat.) ✅
+- [x] Procesează string-urile "Artist 1, Artist 2" în link-uri independente
+- [x] Implementare în `Search.tsx`, `PlayerBar.tsx`, `Artist.tsx`, `Library.tsx`
+
+### 9.2 Search Global & Topbar ✅
+- [x] Crează `Topbar.tsx` cu Input de căutare
+- [x] Elimină "Search" din `Sidebar.tsx`
+- [x] Refactorizează navigarea pentru a deschide rezultatele automat pe `/search?q=...`
+
+### 9.3 Custom React Modals (Fără prompt) ✅
+- [x] Crează `Modal.tsx` (Backdrop blurat + container)
+- [x] Refactorizează `CreatePlaylist` ca UI în loc de `window.prompt()`
+- [x] Folosește Custom Modal în `Sidebar.tsx` și `Library.tsx`
+
+### 9.4 Home Personalizat (History-based) ✅
+- [x] Extrage istoricul din `playerStore` pe pagina Home
+- [x] Afișează o secțiune "Din artiștii ascultați recent..." folosind JioSaavn 추천
+
+### 9.5 Bugfixes & Home Layout Revival ✅
+- [x] Adaugă `persist` middleware pe `playerStore` pentru a nu mai șterge istoricul la Refresh
+- [x] Corectează parsing-ul array-ului `primaryArtists` din JioSaavn pentru Albumele din pagina Artist
+- [x] Reorganizează HomePage: 1. Playlists, 2. History, 3. Recomandări AI, 4. Globale
+
+---
+
+## 🎯 FAZA 10 — Search Quality & Playlist Routing ✅
+
+### 10.1 Global Search: Top Artist Card ✅
+- [x] Implementează `searchArtists` în `spotifyService`
+- [x] Cheamă în paralel melodii și artiști în `Search.tsx`
+- [x] Afișează "Artistul Căutat" deasupra listei de piese pentru căutări precum "Mac Miller"
+
+### 10.2 Bugfix: Blank Artist Pages (SZA / Feats) ✅
+- [x] Relaxează filtrul `includes(artistName)` din `Artist.tsx`
+- [x] Bazează-te exclusiv pe ranking-ul JioSaavn pentru Top Songs, ca să nu trunchiezi rezultate feat.
+
+### 10.3 Route nou: Dedicated Playlist Page ✅
+- [x] Crează `src/pages/PlaylistPage.tsx`
+- [x] Leagă `/playlist/:id` în `App.tsx`
+- [x] Navighează din Home/Sidebar/Library către PlaylistPage la click
 - **Ce înveți:** Lighthouse, code splitting, lazy loading
 
 ### 8.4 Server Backend (API Key Censor Proxy) — Nou 🔒

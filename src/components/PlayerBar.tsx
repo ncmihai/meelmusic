@@ -3,6 +3,7 @@ import { useLibraryStore } from '../stores/libraryStore';
 import { useDownloadStore } from '../stores/downloadStore';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import ArtistList from './ArtistList';
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Shuffle, Repeat, Heart, Mic, ListMusic, Download, CheckCircle, Loader2 } from 'lucide-react';
 
 export default function PlayerBar() {
@@ -57,15 +58,14 @@ export default function PlayerBar() {
               alt={currentSong.title} 
               className="w-14 h-14 rounded shadow-lg object-cover"
             />
-            <div className="flex flex-col overflow-hidden">
-              <span className="text-white text-sm font-medium hover:underline cursor-pointer truncate">
-                {currentSong.title}
-              </span>
-              <span className="text-xs text-[#b3b3b3] hover:underline hover:text-white cursor-pointer truncate">
-                {currentSong.artist}
-              </span>
-            </div>
-            <button 
+            <div className="flex flex-col truncate pr-4">
+          <div className="text-white text-sm font-bold truncate hover:underline cursor-pointer">
+            {currentSong.title}
+          </div>
+          <div className="text-[#a7a7a7] text-xs truncate">
+            <ArtistList artists={currentSong.artist} />
+          </div>
+        </div>    <button 
               onClick={handleLike}
               className={`ml-4 transition-colors ${isLiked(currentSong.id) ? 'text-[#1db954]' : 'text-[#b3b3b3] hover:text-white'}`}
             >

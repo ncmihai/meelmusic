@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { useLibraryStore } from '../stores/libraryStore';
+import { useModalStore } from '../stores/modalStore';
 import { usePlayerStore } from '../stores/playerStore';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import ContextMenu from '../components/ContextMenu';
+import ArtistList from '../components/ArtistList';
 import { Play, Plus, Music, Heart } from 'lucide-react';
 
 export default function Library() {
   const [activeTab, setActiveTab] = useState<'playlists' | 'liked'>('playlists');
-  const { playlists, likedSongs, createPlaylist } = useLibraryStore();
+  const { playlists, likedSongs } = useLibraryStore();
+  const { openCreatePlaylist } = useModalStore();
   const { play, setQueue, currentSong } = usePlayerStore();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -19,10 +23,7 @@ export default function Library() {
       }
       return;
     }
-    const name = prompt("Introdu numele playlistului:");
-    if (name) {
-      createPlaylist(name);
-    }
+    openCreatePlaylist();
   };
 
   const handlePlayLikedSongs = () => {
@@ -80,28 +81,14 @@ export default function Library() {
             return (
               <div 
                 key={playlist.id} 
-                className="bg-[#181818] p-4 rounded-xl cursor-pointer hover:bg-[#282828] transition-colors group flex flex-col relative"
+                onClick={() => navigate(`/playlist/${playlist.id}`)}
+                className="bg-[#181818] p-4 rounded-xl hover:bg-[#282828] transition-colors flex flex-col group cursor-pointer"
               >
-                {/* Play Button Overlay */}
-                <div className="absolute top-[140px] right-6 opacity-0 group-hover:opacity-100 transition-opacity z-10 translate-y-2 group-hover:translate-y-0">
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (playlist.songs.length > 0) {
-                        setQueue(playlist.songs);
-                        play(playlist.songs[0]);
-                      }
-                    }}
-                    className="w-12 h-12 bg-[#1db954] rounded-full flex items-center justify-center text-black hover:scale-105 hover:bg-[#1ed760] shadow-lg shadow-black/40"
-                  >
-                    <Play fill="currentColor" size={24} className="ml-1" />
-                  </button>
-                </div>
-
-                {/* 2x2 Cover Grid or Single Cover/Placeholder */}
-                <div className="w-full aspect-square rounded-md overflow-hidden bg-[#282828] mb-4 shadow-lg flex items-center justify-center">
+                <div className="relative mb-4 pb-[100%] rounded-md bg-gradient-to-br from-[#1db954] to-[#121212] overflow-hidden shadow-lg">
                   {covers.length === 0 ? (
-                    <Music size={48} className="text-[#b3b3b3]" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Music size={48} className="text-[#b3b3b3]" />
+                    </div>
                   ) : covers.length < 4 ? (
                     <img src={covers[0]} className="w-full h-full object-cover" alt="Cover" />
                   ) : (
@@ -189,18 +176,24 @@ export default function Library() {
                       <img src={song.cover_url} alt={song.title} className="w-10 h-10 object-cover rounded" />
                       <div className="flex flex-col truncate pr-4">
                         <span className={`truncate ${isPlaying ? 'text-[#1db954]' : 'text-white'}`}>{song.title}</span>
-                        <span className="text-sm text-[#a7a7a7] truncate">{song.artist}</span>
+                        <div className="text-sm text-[#a7a7a7] truncate">
+                           <ArtistList artists={song.artist} />
+                        </div>
                       </div>
                     </div>
                     
                     <div className="hidden md:block text-sm text-[#a7a7a7] truncate pr-4">
-                      {/* Placeholder since MapTrack might not catch Albums yet if proxy lacks it */}
-                      Album Name
+                      {song.album || 'Unknown Album'}
                     </div>
                     
-                    <div className="text-sm text-[#a7a7a7] text-right pr-2">
-                       {Math.floor(song.duration_ms / 60000)}:
-                       {Math.floor((song.duration_ms % 60000) / 1000).toString().padStart(2, '0')}
+                    <div className="flex items-center justify-end gap-4 text-sm text-[#a7a7a7] pr-2">
+                       <span>
+                         {Math.floor(song.duration_ms / 60000)}:
+                         {Math.floor((song.duration_ms % 60000) / 1000).toString().padStart(2, '0')}
+                       </span>
+                       <div onClick={e => e.stopPropagation()}>
+                         <ContextMenu song={song} />
+                       </div>
                     </div>
                   </div>
                 );

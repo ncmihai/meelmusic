@@ -1,11 +1,25 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, Search, Library, PlusSquare, Heart, LogIn, LogOut, User } from 'lucide-react';
+import { Home, Library, PlusSquare, Heart, LogIn, LogOut, User } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { useLibraryStore } from '../stores/libraryStore';
+import { useModalStore } from '../stores/modalStore';
 import clsx from 'clsx';
 
 export default function Sidebar() {
   const { user, signOut } = useAuth();
+  const { playlists } = useLibraryStore();
   const navigate = useNavigate();
+  const { openCreatePlaylist } = useModalStore();
+
+  const handleCreatePlaylist = () => {
+    if (!user) {
+      if (confirm('Trebuie să fii autentificat pentru a crea un playlist. Vrei să te loghezi?')) {
+        navigate('/login');
+      }
+      return;
+    }
+    openCreatePlaylist();
+  };
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     clsx(
@@ -66,10 +80,6 @@ export default function Sidebar() {
           <Home size={24} />
           <span>Home</span>
         </NavLink>
-        <NavLink to="/search" className={navLinkClass}>
-          <Search size={24} />
-          <span>Search</span>
-        </NavLink>
         <NavLink to="/library" className={navLinkClass}>
           <Library size={24} />
           <span>Your Library</span>
@@ -78,13 +88,19 @@ export default function Sidebar() {
 
       {/* Actions */}
       <div className="flex flex-col gap-2 px-3 mb-4">
-        <button className="flex items-center gap-4 px-4 py-2 text-[var(--color-text-secondary)] hover:text-white transition-colors font-medium">
+        <button 
+          onClick={handleCreatePlaylist}
+          className="flex items-center gap-4 px-4 py-2 text-[var(--color-text-secondary)] hover:text-white transition-colors font-medium"
+        >
           <div className="bg-white/10 p-1.5 rounded-sm">
             <PlusSquare size={20} />
           </div>
           <span>Create Playlist</span>
         </button>
-        <button className="flex items-center gap-4 px-4 py-2 text-[var(--color-text-secondary)] hover:text-white transition-colors font-medium">
+        <button 
+          onClick={() => navigate('/library')}
+          className="flex items-center gap-4 px-4 py-2 text-[var(--color-text-secondary)] hover:text-white transition-colors font-medium"
+        >
           <div className="bg-gradient-to-br from-indigo-500 to-purple-400 p-1.5 rounded-sm text-white">
             <Heart size={20} />
           </div>
@@ -96,13 +112,22 @@ export default function Sidebar() {
         <div className="h-px bg-white/10 w-full" />
       </div>
 
-      {/* Playlists (Placeholder for now) */}
+      {/* Playlists */}
       <div className="flex-1 overflow-y-auto px-6 py-2">
         <ul className="flex flex-col gap-3 text-sm text-[var(--color-text-secondary)]">
-          <li className="hover:text-white cursor-pointer truncate">My Awesome Mix</li>
-          <li className="hover:text-white cursor-pointer truncate">Workout 2026</li>
-          <li className="hover:text-white cursor-pointer truncate">Chill Vibes</li>
-          <li className="hover:text-white cursor-pointer truncate">Coding Focus</li>
+          {playlists.length === 0 ? (
+            <li className="text-xs text-[#b3b3b3] italic">Nu ai niciun playlist creat.</li>
+          ) : (
+            playlists.map((playlist) => (
+              <li 
+                key={playlist.id} 
+                onClick={() => navigate('/library')}
+                className="hover:text-white cursor-pointer truncate"
+              >
+                {playlist.name}
+              </li>
+            ))
+          )}
         </ul>
       </div>
     </aside>

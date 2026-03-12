@@ -4,9 +4,12 @@ import { AuthProvider } from './hooks/useAuth';
 import Home from './pages/Home';
 import Search from './pages/Search';
 import Library from './pages/Library';
+import Artist from './pages/Artist';
+import PlaylistPage from './pages/PlaylistPage';
 import Login from './pages/Login';
 import AudioPlayer from './components/AudioPlayer';
 import MainLayout from './components/MainLayout';
+import CreatePlaylistModal from './components/modals/CreatePlaylistModal';
 import { useDownloadStore } from './stores/downloadStore';
 
 export default function App() {
@@ -19,6 +22,7 @@ export default function App() {
       <AuthProvider>
         {/* The AudioPlayer persists across all pages and manages the HTML5 audio element */}
         <AudioPlayer />
+        <CreatePlaylistModal />
         
         <Routes>
           {/* Public route */}
@@ -29,6 +33,8 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/search" element={<Search />} />
             <Route path="/library" element={<Library />} />
+            <Route path="/artist/:id" element={<Artist />} />
+            <Route path="/playlist/:id" element={<PlaylistPage />} />
           </Route>
         </Routes>
       </AuthProvider>

@@ -3,6 +3,7 @@ import Sidebar from './Sidebar';
 import PlayerBar from './PlayerBar';
 import LyricsPanel from './LyricsPanel';
 import QueuePanel from './QueuePanel';
+import Topbar from './Topbar';
 import { usePlayerStore } from '../stores/playerStore';
 
 export default function MainLayout() {
@@ -18,7 +19,8 @@ export default function MainLayout() {
         
         {/* Main Content Area: Flexes to fill remaining space. 
             When lyrics are open, it naturally scales down via flex-1 constraint. */}
-        <div className="flex-1 bg-[#121212] rounded-lg overflow-hidden flex flex-col relative transition-all duration-300">
+        <div className="flex-1 bg-[#121212] rounded-lg overflow-hidden flex flex-col relative transition-all duration-300 relative">
+          <Topbar />
           <Outlet />
         </div>
 
