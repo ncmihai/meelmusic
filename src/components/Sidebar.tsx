@@ -1,25 +1,67 @@
-import { NavLink } from 'react-router-dom';
-import { Home, Search, Library, PlusSquare, Heart } from 'lucide-react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { Home, Search, Library, PlusSquare, Heart, LogIn, LogOut, User } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 import clsx from 'clsx';
 
 export default function Sidebar() {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     clsx(
-      "flex items-center gap-4 px-4 py-2 rounded-lg transition-colors font-medium",
-      isActive ? "bg-white/10 text-white" : "text-[var(--color-text-secondary)] hover:text-white"
+      "flex items-center gap-4 px-4 py-2 rounded-md transition-colors font-medium",
+      isActive ? "bg-[#282828] text-white" : "text-[#b3b3b3] hover:text-white"
     );
 
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
+  };
+
   return (
-    <aside className="hidden md:flex flex-col w-64 bg-black h-full">
-      {/* Logo */}
-      <div className="p-6">
-        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-cyan-400">
+    <aside className="hidden md:flex flex-col w-64 bg-black h-full pb-24">
+      {/* Logo & Auth Section */}
+      <div className="p-6 pb-2">
+        <h1 className="text-2xl font-bold text-white mb-6">
           MeelMusic
         </h1>
+        
+        {/* User Profile / Login Button */}
+        {user ? (
+          <div className="flex items-center justify-between bg-[#121212] p-3 rounded-lg border border-[#282828]">
+            <div className="flex items-center gap-3 overflow-hidden">
+              {user.user_metadata?.avatar_url ? (
+                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-8 h-8 rounded-full" />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-[#282828] flex items-center justify-center">
+                  <User size={16} className="text-white" />
+                </div>
+              )}
+              <span className="text-sm font-bold text-white truncate max-w-[100px]">
+                {user.user_metadata?.full_name || user.email?.split('@')[0]}
+              </span>
+            </div>
+            <button 
+              onClick={handleLogout}
+              className="p-2 text-[#b3b3b3] hover:text-white transition-colors"
+              title="Log Out"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
+        ) : (
+          <button 
+            onClick={() => navigate('/login')}
+            className="w-full flex items-center justify-center gap-2 bg-white text-black font-bold py-2.5 px-4 rounded-full hover:scale-105 transition-transform"
+          >
+            <LogIn size={18} />
+            Autentificare
+          </button>
+        )}
       </div>
 
       {/* Main Navigation */}
-      <nav className="flex flex-col gap-2 px-3 mb-8">
+      <nav className="flex flex-col gap-2 px-3 mt-6 mb-8">
         <NavLink to="/" className={navLinkClass}>
           <Home size={24} />
           <span>Home</span>

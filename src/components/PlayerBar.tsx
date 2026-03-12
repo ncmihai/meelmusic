@@ -1,10 +1,27 @@
 import { usePlayerStore } from '../stores/playerStore';
 import { useLibraryStore } from '../stores/libraryStore';
+import { useAuth } from '../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Shuffle, Repeat, Heart, Mic, ListMusic } from 'lucide-react';
 
 export default function PlayerBar() {
   const { currentSong, isPlaying, volume, progress, duration, togglePlay, next, prev, setVolume, seek, showLyrics, toggleLyrics, showQueue, toggleQueue } = usePlayerStore();
   const { toggleLikeSong, isLiked } = useLibraryStore();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLike = () => {
+    if (!currentSong) return;
+    
+    if (!user) {
+      if (confirm('Trebuie să fii autentificat pentru a aprecia o melodie. Vrei să te loghezi?')) {
+        navigate('/login');
+      }
+      return;
+    }
+    
+    toggleLikeSong(currentSong);
+  };
 
   const formatTime = (seconds: number) => {
     if (isNaN(seconds)) return "0:00";
@@ -36,7 +53,7 @@ export default function PlayerBar() {
               </span>
             </div>
             <button 
-              onClick={() => toggleLikeSong(currentSong)}
+              onClick={handleLike}
               className={`ml-4 transition-colors ${isLiked(currentSong.id) ? 'text-[#1db954]' : 'text-[#b3b3b3] hover:text-white'}`}
             >
               <Heart size={16} fill={isLiked(currentSong.id) ? 'currentColor' : 'none'} />

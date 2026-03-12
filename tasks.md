@@ -68,24 +68,24 @@
 - [x] Test: conexiunea la Supabase funcționează (login error = API connected) ✓
 - **Ce înveți:** SDK patterns, singleton, PostgREST + GoTrue
 
-### 2.3 Pagina de Login
+### 2.3 Pagina de Login (Email & Google) ✅
 - [x] Formular email + parolă → `supabase.auth.signInWithPassword()`
-- [x] Handling erori (parolă greșită → mesaj în română)
-- [x] Dark theme styling cu Tailwind ✓
-- [x] Verifică login cu cont real creat din Dashboard *(trebuie creat user)*
-- **Ce înveți:** JWT auth, sesiuni, GoTrue
+- [x] Buton Sign Up → `supabase.auth.signUp()` cu Email Confirmation prin Resend SMTP
+- [x] Verifică login cu Google OAuth → `supabase.auth.signInWithOAuth()`
+- [x] UI actualizat (Switch între Login / Register)
+- [x] Înveți: JWT auth, sesiuni, GoTrue, Providers, SMTP Custom
 
-### 2.4 Auth Context & Protected Routes
+### 2.4 Auth Context & Protected Routes ✅
 - [x] `AuthContext` + `AuthProvider` în `useAuth.tsx`
 - [x] `onAuthStateChange` → actualizează starea
-- [x] `ProtectedRoute` → redirect la `/login` dacă neautentificat ✓
-- [x] Test: accesezi `/` fără login → redirect ✓
-- **Ce înveți:** React Context API, auth guard pattern, JWT lifecycle
+- [x] `Sidebar` ascunde butonul Log Out dacă nu ești logat, afișează avatar Google dacă ești.
+- [x] Rute protejate pe acțiuni: Butonul de *Like* și *Create Playlist* cer autentificare.
+- [x] Înveți: React Context API, auth guard pattern, UI Conditional Rendering
 
-### 2.5 Logout & Persistență sesiune
-- [x] Buton Logout pe Home page → `supabase.auth.signOut()`
-- [x] Verifică: refresh → logat; logout → redirect *(trebuie user real)*
-- **Ce înveți:** Session persistence, token refresh flow
+### 2.5 Logout & Persistență sesiune ✅
+- [x] Buton Logout în Sidebar → `supabase.auth.signOut()`
+- [x] Verifică: refresh → rămâi logat; logout → redirectare la `/login`
+- [x] Înveți: Session persistence, token refresh flow
 
 ---
 

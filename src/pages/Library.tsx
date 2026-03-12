@@ -1,16 +1,25 @@
 import { useState } from 'react';
 import { useLibraryStore } from '../stores/libraryStore';
 import { usePlayerStore } from '../stores/playerStore';
+import { useAuth } from '../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import { Play, Plus, Music, Heart } from 'lucide-react';
-import type { Song } from '../types';
 
 export default function Library() {
   const [activeTab, setActiveTab] = useState<'playlists' | 'liked'>('playlists');
   const { playlists, likedSongs, createPlaylist } = useLibraryStore();
   const { play, setQueue, currentSong } = usePlayerStore();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const handleCreatePlaylist = () => {
-    const name = prompt("Enter playlist name:");
+    if (!user) {
+      if (confirm('Trebuie să fii autentificat pentru a crea un playlist. Vrei să te loghezi?')) {
+        navigate('/login');
+      }
+      return;
+    }
+    const name = prompt("Introdu numele playlistului:");
     if (name) {
       createPlaylist(name);
     }
