@@ -71,7 +71,7 @@ export default function PlaylistPage() {
           <button 
             onClick={handlePlayAll}
             disabled={playlist.songs.length === 0}
-            className="w-16 h-16 bg-[#1db954] rounded-full flex items-center justify-center text-black hover:scale-105 hover:bg-[#1ed760] transition-transform shadow-[0_8px_24px_rgba(29,185,84,0.4)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="w-16 h-16 bg-[#9b4dca] rounded-full flex items-center justify-center text-black hover:scale-105 hover:bg-[#aa6add] transition-transform shadow-[0_8px_24px_rgba(29,185,84,0.4)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             <Play fill="currentColor" size={32} className="ml-2" />
           </button>
@@ -106,7 +106,7 @@ export default function PlaylistPage() {
                   >
                     <div className="text-[#a7a7a7] flex items-center justify-center w-6">
                       {isPlaying ? (
-                        <div className="w-4 h-4 text-[#1db954] flex items-center justify-center">
+                        <div className="w-4 h-4 text-[#9b4dca] flex items-center justify-center">
                           <span className="animate-pulse font-bold text-lg">ılı</span>
                         </div>
                       ) : (
@@ -118,7 +118,7 @@ export default function PlaylistPage() {
                     <div className="flex items-center gap-4 overflow-hidden">
                       <img src={song.cover_url} alt={song.title} className="w-10 h-10 object-cover rounded shadow-sm shrink-0" />
                       <div className="flex flex-col truncate pr-4">
-                        <span className={`font-medium truncate ${isPlaying ? 'text-[#1db954]' : 'text-white'}`}>{song.title}</span>
+                        <span className={`font-medium truncate ${isPlaying ? 'text-[#9b4dca]' : 'text-white'}`}>{song.title}</span>
                         <div className="text-xs text-[#a7a7a7] truncate">
                           <ArtistList artists={song.artist} />
                         </div>

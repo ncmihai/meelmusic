@@ -45,8 +45,8 @@ export default function AudioPlayer() {
           localBlobUrl = await cacheService.getCachedSongUrl(currentSong.id);
           streamUrl = localBlobUrl;
         } else {
-          // 1b. Fetch from JioSaavn network if not cached
-          streamUrl = await getAudioStream(currentSong.title, currentSong.artist, currentSong.duration_ms);
+          // 1b. Pass the parameters to our Node Pipe
+          streamUrl = await getAudioStream(currentSong.title, currentSong.artist);
         }
         
         if (!active) return; // Prevent race conditions if song changes fast
@@ -153,8 +153,10 @@ export default function AudioPlayer() {
 
   const handleError = (e: React.SyntheticEvent<HTMLAudioElement, Event>) => {
     console.error("Audio playback error:", e.currentTarget.error);
+    // Dacă am primit o eroare (ex. YouTube ne dă 403 sau pipe-ul meu cade), punem PE PAUZĂ.
+    // În versiunea anterioară dădeam `next()` което ducea la un Infinite Refresh Loop cu dubluri.
     pause(); 
-    next(); // Skip broken streams
+    // Opțional, un toast de alertă: "Piesa este indisponibilă momentan."
   };
 
   return (

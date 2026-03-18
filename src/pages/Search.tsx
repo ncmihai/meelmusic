@@ -71,7 +71,7 @@ export default function Search() {
     const loadRecommendations = async () => {
       setIsLoadingRecs(true);
       try {
-        const recs = await getGenreRecommendations();
+        const recs = await getGenreRecommendations("hip hop");
         setRecommendations(recs);
       } catch (err) {
         console.error("Recommendations error:", err);
@@ -121,7 +121,7 @@ export default function Search() {
                   className="w-full aspect-square object-cover rounded-md shadow-[0_8px_24px_rgba(0,0,0,0.5)]" 
                 />
                 <button 
-                  className="absolute bottom-2 right-2 w-12 h-12 flex justify-center items-center bg-[#1db954] text-black rounded-full shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 hover:scale-105 hover:bg-[#1ed760]"
+                  className="absolute bottom-2 right-2 w-12 h-12 flex justify-center items-center bg-[#9b4dca] text-black rounded-full shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 hover:scale-105 hover:bg-[#aa6add]"
                   onClick={(e) => {
                     e.stopPropagation(); // Don't trigger the parent onClick twice
                     play(song);

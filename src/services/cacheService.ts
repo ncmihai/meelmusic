@@ -22,7 +22,7 @@ export const cacheService = {
     try {
       // 1. Get the stream URL 
       // (Bypasses caching to ensure we get a fresh, working URL for the download)
-      const streamUrl = await getAudioStream(song.title, song.artist, song.duration_ms);
+      const streamUrl = await getAudioStream(song.title, song.artist);
       
       if (!streamUrl) {
         throw new Error('No stream URL available to download.');

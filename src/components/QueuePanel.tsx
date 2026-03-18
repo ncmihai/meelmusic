@@ -37,11 +37,11 @@ export default function QueuePanel() {
               <div className="relative w-12 h-12 shrink-0 rounded overflow-hidden">
                 <img src={currentSong.cover_url} alt={currentSong.title} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                  <Music size={16} className="text-[#1db954] animate-pulse" />
+                  <Music size={16} className="text-[#9b4dca] animate-pulse" />
                 </div>
               </div>
               <div className="flex flex-col truncate flex-1">
-                <span className="text-[#1db954] font-medium truncate">{currentSong.title}</span>
+                <span className="text-[#9b4dca] font-medium truncate">{currentSong.title}</span>
                 <span className="text-xs text-[#a7a7a7] truncate">
                   <ArtistList artists={currentSong.artist} />
                 </span>

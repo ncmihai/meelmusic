@@ -76,7 +76,7 @@ export default function Topbar() {
          {/* User Initial Badge */}
          {user && (
            <div 
-             className="w-8 h-8 rounded-full bg-[#1db954] flex items-center justify-center text-black font-bold text-sm shadow-md" 
+             className="w-8 h-8 rounded-full bg-[#9b4dca] flex items-center justify-center text-black font-bold text-sm shadow-md" 
              title={user.user_metadata?.full_name || user.email || 'User'}
            >
              {(user.user_metadata?.full_name?.charAt(0) || user.email?.charAt(0) || 'U').toUpperCase()}

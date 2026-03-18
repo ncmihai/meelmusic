@@ -84,7 +84,7 @@ export default function Library() {
                 onClick={() => navigate(`/playlist/${playlist.id}`)}
                 className="bg-[#181818] p-4 rounded-xl hover:bg-[#282828] transition-colors flex flex-col group cursor-pointer"
               >
-                <div className="relative mb-4 pb-[100%] rounded-md bg-gradient-to-br from-[#1db954] to-[#121212] overflow-hidden shadow-lg">
+                <div className="relative mb-4 pb-[100%] rounded-md bg-gradient-to-br from-[#9b4dca] to-[#121212] overflow-hidden shadow-lg">
                   {covers.length === 0 ? (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <Music size={48} className="text-[#b3b3b3]" />
@@ -127,7 +127,7 @@ export default function Library() {
             <div className="flex items-center gap-4 mb-8">
               <button 
                 onClick={handlePlayLikedSongs}
-                className="w-14 h-14 bg-[#1db954] rounded-full flex items-center justify-center text-black hover:scale-105 hover:bg-[#1ed760] transition-transform"
+                className="w-14 h-14 bg-[#9b4dca] rounded-full flex items-center justify-center text-black hover:scale-105 hover:bg-[#aa6add] transition-transform"
               >
                 <Play fill="currentColor" size={28} className="ml-1" />
               </button>
@@ -163,7 +163,7 @@ export default function Library() {
                   >
                     <div className="text-[#a7a7a7] flex items-center justify-center w-6">
                       {isPlaying ? (
-                         <div className="w-4 h-4 text-[#1db954] flex items-center justify-center">
+                         <div className="w-4 h-4 text-[#9b4dca] flex items-center justify-center">
                            <Music size={14} className="animate-pulse" />
                          </div>
                       ) : (
@@ -175,7 +175,7 @@ export default function Library() {
                     <div className="flex items-center gap-3 overflow-hidden">
                       <img src={song.cover_url} alt={song.title} className="w-10 h-10 object-cover rounded" />
                       <div className="flex flex-col truncate pr-4">
-                        <span className={`truncate ${isPlaying ? 'text-[#1db954]' : 'text-white'}`}>{song.title}</span>
+                        <span className={`truncate ${isPlaying ? 'text-[#9b4dca]' : 'text-white'}`}>{song.title}</span>
                         <div className="text-sm text-[#a7a7a7] truncate">
                            <ArtistList artists={song.artist} />
                         </div>

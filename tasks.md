@@ -327,6 +327,22 @@
 - [x] Crează `src/pages/PlaylistPage.tsx`
 - [x] Leagă `/playlist/:id` în `App.tsx`
 - [x] Navighează din Home/Sidebar/Library către PlaylistPage la click
+
+---
+
+## 💜 FAZA 11 — The Hybrid Engine & MeelMusic Branding ✅
+### 11.1 Custom Theme Overhaul ✅
+- [x] Înlocuiește verdele `#1db954` cu Neon Purple pe toată platforma (tailwind, index.css, pagini)
+- [x] Actualizează logo-ul / sidebar-ul cu brandingul MeelMusic
+
+### 11.2 Spotify Metadata Proxy (Node Backend) ✅
+- [x] Creează `/server` cu Express.js
+- [x] Implementează OAuth Spotify Client Credentials (folosind keys din `.env`)
+- [x] Expune rutele `/api/search`, `/api/artist`, `/api/albums` catre Frontend
+
+### 11.3 YouTube Audio Streaming Extraction ✅
+- [x] Implementează o rută `/api/stream` care preia un MP3 via YouTube pe baza numelui piesei
+- [x] Leagă `AudioPlayer.tsx` la acest endpoint nativ
 - **Ce înveți:** Lighthouse, code splitting, lazy loading
 
 ### 8.4 Server Backend (API Key Censor Proxy) — Nou 🔒

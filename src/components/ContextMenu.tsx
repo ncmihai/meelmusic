@@ -109,7 +109,7 @@ export default function ContextMenu({ song }: ContextMenuProps) {
             <div className="bg-[#1e1e1e] mx-2 rounded-md mb-2 flex flex-col max-h-40 overflow-y-auto custom-scrollbar border border-white/5">
                <button 
                  onClick={handleCreatePlaylist}
-                 className="flex items-center gap-2 px-3 py-2 text-[#1db954] hover:bg-white/5 text-left w-full transition-colors border-b border-white/5"
+                 className="flex items-center gap-2 px-3 py-2 text-[#9b4dca] hover:bg-white/5 text-left w-full transition-colors border-b border-white/5"
                >
                  <PlusSquare size={14} /> Crează Nou
                </button>
@@ -142,7 +142,7 @@ export default function ContextMenu({ song }: ContextMenuProps) {
              }}
              className={clsx(
                "flex items-center gap-3 px-4 py-2.5 hover:bg-white/10 text-left w-full transition-colors",
-               downloaded ? "text-[#1db954]" : "text-white"
+               downloaded ? "text-[#9b4dca]" : "text-white"
              )}
           >
             {downloaded ? <CheckCircle size={16} /> : <Download size={16} className="text-[#b3b3b3]" />}

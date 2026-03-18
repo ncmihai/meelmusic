@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { usePlayerStore } from '../stores/playerStore';
 import { searchSpotifySongs, getPopularSongs } from '../services/spotifyService';
@@ -19,9 +19,21 @@ export default function Home() {
   const [historyRecs, setHistoryRecs] = useState<{ artist: string, songs: Song[] } | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Extract up to 6 unique recently played artists from history
-  const recentSongs = [...history].reverse().slice(0, 8); // Top 8 most recent
-  const uniqueArtists = Array.from(new Set(recentSongs.map(s => s.artist.split(',')[0].trim())));
+  // Extract recent history (up to 8 UNIQUE songs)
+  const recentSongs = useMemo(() => {
+    const unique: Song[] = [];
+    const seen = new Set<string>();
+    // Parcurgem invers istoricul pentru a lua cel mai recent moment în care ai ascultat piesa
+    for (const song of [...history].reverse()) {
+      if (!seen.has(song.id)) {
+        unique.push(song);
+        seen.add(song.id);
+      }
+      if (unique.length >= 8) break;
+    }
+    return unique;
+  }, [history]);
+  const uniqueArtists = Array.from(new Set(recentSongs.map((s: Song) => s.artist.split(',')[0].trim())));
 
   useEffect(() => {
     const fetchHomeContent = async () => {
@@ -33,16 +45,30 @@ export default function Home() {
 
         // If user has history, fetch recommendations based on their most recent artist
         if (uniqueArtists.length > 0) {
-          const topArtist = uniqueArtists[0]; // Most recent artist
-          const recs = await searchSpotifySongs(topArtist, 10);
+          // Preluăm recomandări combinate pentru TOP 3 artiști din stivă!
+          const seedArtists = uniqueArtists.slice(0, 3);
+          const mixSongs: Song[] = [];
           
-          // Filter out exactly what they just played to show new stuff from that artist
-          const historyIds = new Set(recentSongs.map(s => s.id));
-          const filteredRecs = recs.filter((r: Song) => !historyIds.has(r.id)).slice(0, 6);
+          // Căutare paralelă masivă (foarte rapidă via Node.js Backend)
+          await Promise.all(seedArtists.map(async (artistName) => {
+             const tracks = await searchSpotifySongs(artistName, 7); // 7 piese per artist
+             mixSongs.push(...tracks);
+          }));
           
-          if (filteredRecs.length > 0) {
-            setHistoryRecs({ artist: topArtist, songs: filteredRecs });
+          // Amestecăm piesele (Fisher-Yates shuffle simplificat) pentru a crea senzația de "Radio"
+          const shuffled = mixSongs.sort(() => 0.5 - Math.random());
+          
+          // Ne asigurăm că eliminăm dublurile (dacă artiștii au piese comune)
+          const uniqueMix = [];
+          const mixSeen = new Set();
+          for (const s of shuffled) {
+             if (!mixSeen.has(s.id)) {
+                uniqueMix.push(s);
+                mixSeen.add(s.id);
+             }
           }
+          
+          setHistoryRecs({ artist: "Mixtape-ul Tău Personalizat", songs: uniqueMix.slice(0, 18) });
         }
       } catch (err) {
         console.error("Home fetch error", err);
@@ -80,7 +106,7 @@ export default function Home() {
                       setQueue(songs);
                       play(song);
                     }}
-                    className={`absolute bottom-2 right-2 w-12 h-12 bg-[#1db954] rounded-full flex items-center justify-center text-black shadow-xl transition-all duration-300 ${isPlaying ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 hover:bg-[#1ed760]'}`}
+                    className={`absolute bottom-2 right-2 w-12 h-12 bg-[#9b4dca] rounded-full flex items-center justify-center text-black shadow-xl transition-all duration-300 ${isPlaying ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 hover:bg-[#aa6add]'}`}
                   >
                     <Play fill="currentColor" size={24} className="ml-1" />
                   </button>
@@ -88,7 +114,7 @@ export default function Home() {
                 
                 <div className="flex justify-between items-start">
                   <div className="overflow-hidden flex-1 pr-2">
-                    <h3 className={`font-bold truncate mb-1 ${isPlaying ? 'text-[#1db954]' : 'text-white'}`}>{song.title}</h3>
+                    <h3 className={`font-bold truncate mb-1 ${isPlaying ? 'text-[#9b4dca]' : 'text-white'}`}>{song.title}</h3>
                     <div className="text-[#a7a7a7] text-sm truncate">
                       <ArtistList artists={song.artist} />
                     </div>
@@ -108,7 +134,7 @@ export default function Home() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-[#a7a7a7]">
-        <div className="w-12 h-12 border-4 border-[#1db954] border-t-transparent rounded-full animate-spin mb-4" />
+        <div className="w-12 h-12 border-4 border-[#9b4dca] border-t-transparent rounded-full animate-spin mb-4" />
         <p>Se încarcă recomandările...</p>
       </div>
     );
@@ -132,12 +158,12 @@ export default function Home() {
                   onClick={() => navigate('/library')}
                   className="bg-[#2a2a2a] hover:bg-[#3e3e3e] flex items-center gap-4 rounded-md overflow-hidden cursor-pointer transition-colors pr-4 group shadow-md"
                 >
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#1db954] to-[#121212] shrink-0 flex items-center justify-center shadow-sm">
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#9b4dca] to-[#121212] shrink-0 flex items-center justify-center shadow-sm">
                     <ListMusic size={24} className="text-black" />
                   </div>
                   <div className="flex-1 truncate py-2 flex items-center justify-between">
                      <span className="text-white font-bold text-base truncate">{pl.name}</span>
-                     <button className="opacity-0 group-hover:opacity-100 text-[#1db954] transition-opacity bg-black/40 rounded-full p-2 ml-2 hover:scale-110">
+                     <button className="opacity-0 group-hover:opacity-100 text-[#9b4dca] transition-opacity bg-black/40 rounded-full p-2 ml-2 hover:scale-110">
                         <Play fill="currentColor" size={16} />
                      </button>
                   </div>
@@ -167,7 +193,7 @@ export default function Home() {
                         <span className="text-white font-bold text-sm truncate">{song.title}</span>
                         <span className="text-[#a7a7a7] text-xs truncate">{song.artist}</span>
                      </div>
-                     <button className="opacity-0 group-hover:opacity-100 text-[#1db954] transition-opacity bg-black/40 rounded-full p-1.5 ml-2 hover:scale-110">
+                     <button className="opacity-0 group-hover:opacity-100 text-[#9b4dca] transition-opacity bg-black/40 rounded-full p-1.5 ml-2 hover:scale-110">
                         <Play fill="currentColor" size={14} />
                      </button>
                   </div>
@@ -178,7 +204,11 @@ export default function Home() {
       )}
 
       {/* 2. History Based Recommendations */}
-      {historyRecs && renderGrid(historyRecs.songs, `Din artiștii ascultați: ${historyRecs.artist}`)}
+      {historyRecs && historyRecs.songs.length > 0 && (
+         <div className="mb-8">
+           {renderGrid(historyRecs.songs, historyRecs.artist)}
+         </div>
+      )}
 
       {/* 3. Trending / Global Recommendations */}
       {renderGrid(trending, "Recomandări Globale")}

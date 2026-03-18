@@ -143,7 +143,7 @@ export default function Login() {
               </div>
             )}
             {message && (
-              <div className="mb-4 rounded-lg bg-[#1db954]/10 border border-[#1db954]/20 px-4 py-3 text-sm text-[#1db954]">
+              <div className="mb-4 rounded-lg bg-[#9b4dca]/10 border border-[#9b4dca]/20 px-4 py-3 text-sm text-[#9b4dca]">
                 {message}
               </div>
             )}
@@ -152,7 +152,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-full bg-[#1db954] py-3 font-bold text-black transition-transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+              className="w-full rounded-full bg-[#9b4dca] py-3 font-bold text-black transition-transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed mb-4"
             >
               {loading ? 'Se procesează...' : (isSignUp ? 'Creează cont' : 'Intră în cont')}
             </button>

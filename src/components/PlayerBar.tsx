@@ -67,7 +67,7 @@ export default function PlayerBar() {
           </div>
         </div>    <button 
               onClick={handleLike}
-              className={`ml-4 transition-colors ${isLiked(currentSong.id) ? 'text-[#1db954]' : 'text-[#b3b3b3] hover:text-white'}`}
+              className={`ml-4 transition-colors ${isLiked(currentSong.id) ? 'text-[#9b4dca]' : 'text-[#b3b3b3] hover:text-white'}`}
             >
               <Heart size={16} fill={isLiked(currentSong.id) ? 'currentColor' : 'none'} />
             </button>
@@ -75,11 +75,11 @@ export default function PlayerBar() {
               onClick={handleDownloadToggle}
               disabled={isDownloading(currentSong.id)}
               className={`ml-3 transition-colors ${
-                isDownloaded(currentSong.id) ? 'text-[#1db954]' : 'text-[#b3b3b3] hover:text-white'
+                isDownloaded(currentSong.id) ? 'text-[#9b4dca]' : 'text-[#b3b3b3] hover:text-white'
               }`}
             >
               {isDownloading(currentSong.id) ? (
-                <Loader2 size={16} className="animate-spin text-[#1db954]" />
+                <Loader2 size={16} className="animate-spin text-[#9b4dca]" />
               ) : isDownloaded(currentSong.id) ? (
                 <CheckCircle size={16} />
               ) : (
@@ -141,7 +141,7 @@ export default function PlayerBar() {
             {/* Custom track */}
             <div className="w-full h-1 bg-[#4d4d4d] rounded-full overflow-hidden">
               <div 
-                className="h-full bg-white group-hover:bg-[#1db954] rounded-full"
+                className="h-full bg-white group-hover:bg-[#9b4dca] rounded-full"
                 style={{ width: `${currentProgress}%` }}
               />
             </div>
@@ -156,7 +156,7 @@ export default function PlayerBar() {
         {/* Lyrics Toggle */}
         <button 
           onClick={toggleLyrics}
-          className={`hover:text-white transition-colors ${showLyrics ? 'text-[#1db954]' : 'text-[#b3b3b3]'}`}
+          className={`hover:text-white transition-colors ${showLyrics ? 'text-[#9b4dca]' : 'text-[#b3b3b3]'}`}
           title="Lyrics"
         >
           <Mic size={18} />
@@ -165,7 +165,7 @@ export default function PlayerBar() {
         {/* Queue Toggle */}
         <button 
           onClick={toggleQueue}
-          className={`hover:text-white transition-colors ${showQueue ? 'text-[#1db954]' : 'text-[#b3b3b3]'}`}
+          className={`hover:text-white transition-colors ${showQueue ? 'text-[#9b4dca]' : 'text-[#b3b3b3]'}`}
           title="Queue"
         >
           <ListMusic size={18} />
@@ -191,7 +191,7 @@ export default function PlayerBar() {
             />
             <div className="w-full h-1 bg-[#4d4d4d] rounded-full overflow-hidden">
               <div 
-                className="h-full bg-white group-hover:bg-[#1db954] rounded-full"
+                className="h-full bg-white group-hover:bg-[#9b4dca] rounded-full"
                 style={{ width: `${volume * 100}%` }}
               />
             </div>

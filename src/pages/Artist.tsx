@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { searchSpotifySongs, searchAlbums } from '../services/spotifyService';
+import { useParams } from 'react-router-dom';
+import { searchArtists, searchAlbums, getArtistTopTracks } from '../services/spotifyService';
 import { usePlayerStore } from '../stores/playerStore';
 import ContextMenu from '../components/ContextMenu';
 import ArtistList from '../components/ArtistList';
-import { Play, Disc, ArrowLeft } from 'lucide-react';
+import { Play, Disc, ArrowLeft, BadgeCheck, User } from 'lucide-react';
 import type { Song } from '../types';
 
 export default function Artist() {
   const { id } = useParams<{ id: string }>();
-  const artistName = id ? decodeURIComponent(id) : '';
-  const navigate = useNavigate();
+  const artistName = decodeURIComponent(id || '');
   
+  const [artistInfo, setArtistInfo] = useState<any>(null);
   const [topSongs, setTopSongs] = useState<Song[]>([]);
   const [albums, setAlbums] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,23 +24,28 @@ export default function Artist() {
     const fetchArtistData = async () => {
       setIsLoading(true);
       try {
-        // Fetch Top Songs & Albums in parallel
+        // 1. Resolve true Spotify Artist ID from name
+        const artists = await searchArtists(artistName, 1);
+        if (artists.length === 0) {
+          setTopSongs([]);
+          setAlbums([]);
+          setArtistInfo(null); // Clear artist info if not found
+          return;
+        }
+
+        const realArtist = artists[0];
+        setArtistInfo(realArtist);
+
+        // 2. Fetch Top Songs & Albums precisely by ID
         const [songsRes, albumsRes] = await Promise.all([
-          searchSpotifySongs(artistName, 15),
-          searchAlbums(artistName, 10)
+          getArtistTopTracks(realArtist.id),
+          searchAlbums(realArtist.id, 10)
         ]);
 
-        // We relax the filter because JioSaavn sometimes formats names differently 
-        // e.g. "S.Z.A." vs "SZA", which caused our strict string filter to drop all songs and show an empty page.
-        // We trust the API's ranking for the Top Songs list.
         setTopSongs(songsRes);
-        
-        // We still loosely filter albums just to be safe, but can also relax it if we want.
-        // Even for albums, JioSaavn is usually accurate when searching specific artists.
         setAlbums(albumsRes);
-        
       } catch (err) {
-        console.error("Failed to fetch artist data", err);
+        console.error("Artist profile failed:", err);
       } finally {
         setIsLoading(false);
       }
@@ -59,7 +64,7 @@ export default function Artist() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-[#a7a7a7]">
-        <div className="w-12 h-12 border-4 border-[#1db954] border-t-transparent rounded-full animate-spin mb-4" />
+        <div className="w-12 h-12 border-4 border-[#9b4dca] border-t-transparent rounded-full animate-spin mb-4" />
         <p>Se încarcă artistul...</p>
       </div>
     );
@@ -67,24 +72,25 @@ export default function Artist() {
 
   return (
     <div className="h-full flex flex-col overflow-y-auto">
-      {/* Header / Hero */}
-      <div className="relative w-full h-64 md:h-80 bg-[#1e1e1e] flex items-end p-8 shadow-2xl">
-        <button 
-          onClick={() => navigate(-1)}
-          className="absolute top-6 left-6 w-10 h-10 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/80 transition-colors z-10"
-        >
-          <ArrowLeft size={20} />
-        </button>
-
-        {/* Abstract Gradient Background for Artist */}
-        <div className="absolute inset-0 opacity-40 bg-gradient-to-t from-black to-transparent" />
+      {/* Hero Section */}
+      <div className="flex flex-col md:flex-row items-center md:items-end gap-6 mb-8 pt-8">
+        <div className="w-48 h-48 md:w-56 md:h-56 shrink-0 shadow-2xl rounded-full overflow-hidden bg-[#282828] border-4 border-[#121212]">
+          {artistInfo?.cover_url ? (
+            <img src={artistInfo.cover_url} alt={artistName} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center text-[#a7a7a7]">
+              <User size={64} className="mb-2" />
+            </div>
+          )}
+        </div>
         
-        <div className="relative z-10">
-          <p className="text-sm font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-blue-500" /> Profil Verificat
-          </p>
-          <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tighter">
-            {artistName}
+        <div className="flex flex-col items-center md:items-start text-center md:text-left">
+          <div className="flex items-center gap-2 mb-2 text-sm font-bold text-white bg-[#1db954]/20 px-3 py-1 rounded-full w-max mx-auto md:mx-0">
+            <BadgeCheck size={16} className="text-[#1db954]" />
+            <span className="text-[#1db954]">PROFIL VERIFICAT</span>
+          </div>
+          <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6">
+            {artistInfo?.name || artistName}
           </h1>
           <p className="text-[#a7a7a7]">{topSongs.length} Melodii Populare</p>
         </div>
@@ -95,7 +101,7 @@ export default function Artist() {
         <div className="flex items-center gap-6 mb-10">
           <button 
             onClick={handlePlayAll}
-            className="w-16 h-16 bg-[#1db954] rounded-full flex items-center justify-center text-black hover:scale-105 hover:bg-[#1ed760] transition-transform shadow-[0_8px_24px_rgba(29,185,84,0.4)]"
+            className="w-16 h-16 bg-[#9b4dca] rounded-full flex items-center justify-center text-black hover:scale-105 hover:bg-[#aa6add] transition-transform shadow-[0_8px_24px_rgba(29,185,84,0.4)]"
           >
             <Play fill="currentColor" size={32} className="ml-2" />
           </button>
@@ -121,7 +127,7 @@ export default function Artist() {
                   >
                     <div className="text-[#a7a7a7] flex items-center justify-center w-6">
                       {isPlaying ? (
-                        <div className="w-4 h-4 text-[#1db954] flex items-center justify-center">
+                        <div className="w-4 h-4 text-[#9b4dca] flex items-center justify-center">
                           <span className="animate-pulse font-bold text-lg">ılı</span>
                         </div>
                       ) : (
@@ -133,7 +139,7 @@ export default function Artist() {
                     <div className="flex items-center gap-4 overflow-hidden">
                       <img src={song.cover_url} alt={song.title} className="w-10 h-10 object-cover rounded shadow-md shrink-0" />
                       <div className="flex flex-col truncate pr-4">
-                        <span className={`font-medium truncate ${isPlaying ? 'text-[#1db954]' : 'text-white'}`}>{song.title}</span>
+                        <span className={`font-medium truncate ${isPlaying ? 'text-[#9b4dca]' : 'text-white'}`}>{song.title}</span>
                         <span className="text-xs text-[#a7a7a7] truncate">
                            <ArtistList artists={song.artist} />
                         </span>
